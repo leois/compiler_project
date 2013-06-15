@@ -27,7 +27,7 @@ public class TableBuilderVisitor implements VisitorSymbol {
   // VarDeclList vl;
   // MethodDeclList ml;
   public void visit(ClassDeclSimple n) {
-    Symbol symbol = new Symbol(n.i.s, n.getLine());
+    Symbol symbol = new Symbol(n.i.s, n.i.getLine());
     _currentClass = new Clase(symbol, n.i.getLine());
     
     for ( int i = 0; i < n.vl.size(); i++ ) {

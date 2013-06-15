@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sun.org.apache.bcel.internal.generic.ArrayType;
-
 import Semantic.E;
 import Semantic.ErrorTypes;
 import Semantic.SymbolTable.Structure.Clase;
@@ -60,15 +58,14 @@ public class TypeChecker implements Visitor{
 	// VarDeclList vl;
 	// MethodDeclList ml;
 	public void visit(ClassDeclExtends n) {
-		Symbol claseSymbol = new Symbol(n.i.s, n.i.getLine());
-		_currentClass = claseSymbol;
+		_currentClass = new Symbol(n.i.s, n.i.getLine());
 		
 		//super class checking
 		Symbol superClass = new Symbol(n.j.s, n.getLine());
 		checkType(superClass, _table.getTable().keySet());
 		
 		//variables checking
-		Map<Symbol, Type> variables = _table.getTable().get(claseSymbol).getVariables();
+		Map<Symbol, Type> variables = _table.getTable().get(_currentClass).getVariables();
 		checkVariables(n.vl, variables, _table.getTable().keySet());
 		
 		for ( int i = 0; i < n.ml.size(); i++ ) {
@@ -148,19 +145,19 @@ public class TypeChecker implements Visitor{
 	private void checkReturnType(Type type, Exp e){
 		boolean same = false;
 		e.accept(this);
-		if(type.getClass().isAssignableFrom(IdentifierType.class) && 
+		if(type.getClass().isAssignableFrom(IdentifierType.class) && _returnType != null &&
 				_returnType.getClass().isAssignableFrom(IdentifierType.class)){
 			IdentifierType id1 = (IdentifierType) type;
 			IdentifierType id2 = (IdentifierType) _returnType;
 			if(id1.s.equals(id2.s)) 
 				same = true;
 			
-		}else{
+		}else if(_returnType != null ){
 			same = type.getClass().isAssignableFrom(_returnType.getClass());
 		}
 		
 		if( !same ){
-			_errors.add(new E(ErrorTypes.WRONG_RETURN.mss(), _returnType.getLine()));
+			_errors.add(new E(ErrorTypes.WRONG_RETURN.mss(), e.getLine()));
 		}
 		
 	}
@@ -230,9 +227,34 @@ public class TypeChecker implements Visitor{
 	@Override
 	public void visit(Call n) {
 		n.e.accept(this);
+		//finding return type
+        Clase c = null;
+		if(_returnExpression.getClass().isAssignableFrom(NewObject.class)){
+			NewObject no = (NewObject) _returnExpression;
+			c = _table.searchClassByName(no.i.s);
+		}else if(_returnExpression.getClass().isAssignableFrom(IdentifierExp.class)){
+			IdentifierExp ie = (IdentifierExp) _returnExpression;
+			IdentifierType t = (IdentifierType) searchVariableType(ie.s);
+			c = _table.searchClassByName(t.s);
+		}else if(_returnExpression.getClass().isAssignableFrom(This.class)){
+			c = _table.getTable().get(_currentClass);
+		}
 		
-		String clase = "";//??
-		String method = n.i.s;
+		_returnType =  (c != null)? searchMethodTypeByName(c, n.i.s) : null;
+				
+		_returnExpression = n;
+	}
+	
+	private Type searchMethodTypeByName(Clase c, String met){
+		Type t = c.searchMethodTypeByName(met);
+		if(t == null && c.getSuperClass() != null){
+			c = _table.searchClassByName(c.getSuperClass().getId());
+			do{
+				t = c.searchMethodTypeByName(met);
+				c = _table.getTable().get(c.getSuperClass());
+			}while(t == null && c != null);
+		}
+		return t;
 	}
 
 

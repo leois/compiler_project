@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import AST.Type;
 import Semantic.E;
 import Semantic.ErrorTypes;
 
@@ -31,6 +32,14 @@ public class Table{
 
 	public void setTable(Map<Symbol, Clase> table) {
 		this._table = table;
+	}
+	
+	public Clase searchClassByName(String var){
+		for(Symbol s : _table.keySet()){
+			if(s.getId().equals(var))
+				return _table.get(s);
+		}
+		return null;
 	}
 	
 	public void printTable(){

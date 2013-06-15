@@ -50,6 +50,14 @@ public class Clase{
 		}
 		return null;
 	}
+	
+	public Type searchMethodTypeByName(String var){
+		for(Symbol s : _methods.keySet()){
+			if(s.getId().equals(var))
+				return _methods.get(s).getReturnType();
+		}
+		return null;
+	}
 
 	public Symbol getSymbol() {
 		return _symbol;
