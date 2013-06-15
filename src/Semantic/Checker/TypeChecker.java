@@ -5,29 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.org.apache.bcel.internal.generic.ArrayType;
+
 import Semantic.E;
 import Semantic.ErrorTypes;
 import Semantic.SymbolTable.Structure.Clase;
 import Semantic.SymbolTable.Structure.Method;
 import Semantic.SymbolTable.Structure.Symbol;
 import Semantic.SymbolTable.Structure.Table;
-import AST.ClassDeclExtends;
-import AST.ClassDeclSimple;
-import AST.Formal;
-import AST.FormalList;
-import AST.IdentifierType;
-import AST.MethodDecl;
-import AST.Program;
-import AST.Type;
-import AST.VarDecl;
-import AST.VarDeclList;
-import AST.Visitor.VisitorSymbol;
-
-public class TypeChecker implements VisitorSymbol{
+import AST.*;
+import AST.Visitor.Visitor;
+public class TypeChecker implements Visitor{
 	
 	private Table _table;
 	private List<E> _errors;
 	private Symbol _currentClass;
+	private Symbol _currentMethod;
+	private Type _returnType;
+	private Exp _returnExpression;
 	
 	public TypeChecker(Table table){
 		_table = table;
@@ -89,16 +84,16 @@ public class TypeChecker implements VisitorSymbol{
 	// Exp e;
 	public void visit(MethodDecl n) {
 		Symbol methodSymbol = new Symbol(n.i.s, n.i.getLine());
+		_currentMethod = methodSymbol;
 		Method method = _table.getTable().get(_currentClass).getMethods().get(methodSymbol);
 	  	
 		checkIdentifier(method.getReturnType(), _table.getTable().keySet());
-		
-	  	method.setReturnType(n.t);
-	  	//method.setClase(_currentClass.getSymbol());
+		checkReturnType(method.getReturnType(), n.e);
 	  	
 	  	checkArguments(n.fl, method.getArguments(), _table.getTable().keySet());
 	    
 	    checkVariables(n.vl, method.getVariables(), _table.getTable().keySet());
+	    _currentMethod = null;
 	}
 
 
@@ -148,5 +143,245 @@ public class TypeChecker implements VisitorSymbol{
 			if( !defined )
 				_errors.add(new E(ErrorTypes.UNDECLARED_TYPE.mss() + " " + id.s, id.getLine()));
 		}
+	}
+	
+	private void checkReturnType(Type type, Exp e){
+		boolean same = false;
+		e.accept(this);
+		if(type.getClass().isAssignableFrom(IdentifierType.class) && 
+				_returnType.getClass().isAssignableFrom(IdentifierType.class)){
+			IdentifierType id1 = (IdentifierType) type;
+			IdentifierType id2 = (IdentifierType) _returnType;
+			if(id1.s.equals(id2.s)) 
+				same = true;
+			
+		}else{
+			same = type.getClass().isAssignableFrom(_returnType.getClass());
+		}
+		
+		if( !same ){
+			_errors.add(new E(ErrorTypes.WRONG_RETURN.mss(), _returnType.getLine()));
+		}
+		
+	}
+
+	@Override
+	public void visit(IntArrayType n) {
+		_returnType = n;
+	}
+
+	@Override
+	public void visit(BooleanType n) {
+		_returnType = n;
+	}
+
+	@Override
+	public void visit(IntegerType n) {
+		_returnType = n;
+	}
+
+	@Override
+	public void visit(IdentifierType n) {
+		_returnType = n;
+	}
+
+	@Override
+	public void visit(And n) {
+		_returnType = new BooleanType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(LessThan n) {
+		_returnType = new BooleanType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(Plus n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(Minus n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(Times n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(ArrayLookup n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(ArrayLength n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(Call n) {
+		n.e.accept(this);
+		
+		String clase = "";//??
+		String method = n.i.s;
+	}
+
+
+	@Override
+	public void visit(IntegerLiteral n) {
+		_returnType = new IntegerType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(True n) {
+		_returnType = new BooleanType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(False n) {
+		_returnType = new BooleanType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(IdentifierExp n) {
+		_returnExpression = n;
+		Type t = searchVariableType(n.s);
+		_returnType = t;
+	}
+	
+	private Type searchVariableType(String var){
+		Method method = _table.getTable().get(_currentClass).getMethods().get(_currentMethod);
+		Type t = method.searchByName(var);
+		if( t == null ){
+			Clase clase = _table.getTable().get(_currentClass);
+			do{
+				t = clase.searchVariableByName(var);
+				clase = _table.getTable().get(clase.getSuperClass());
+			}while(t == null && clase != null);
+		}
+		return t;
+	}
+
+
+	@Override
+	public void visit(This n) {
+		_returnExpression = n;
+		_returnType = new IdentifierType(_currentClass.getId(), n.getLine());
+	}
+
+
+	@Override
+	public void visit(NewArray n) {
+		_returnExpression = n;
+		_returnType = new IntArrayType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(NewObject n) {
+		_returnExpression = n;
+		_returnType = new IdentifierType(n.i.s, n.getLine());
+	}
+
+
+	@Override
+	public void visit(Not n) {
+		_returnType = new BooleanType(n.getLine());
+	}
+
+
+	@Override
+	public void visit(Display n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(MainClass n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(VarDecl n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Formal n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Block n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(If n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(While n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Print n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Assign n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(ArrayAssign n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Identifier n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(Empty n) {
+		// TODO Auto-generated method stub
+		
 	}
 }

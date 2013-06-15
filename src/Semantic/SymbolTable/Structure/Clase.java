@@ -42,6 +42,14 @@ public class Clase{
 		}
 		_variables.put(symbol, variable);
 	}
+	
+	public Type searchVariableByName(String var){
+		for(Symbol s : _variables.keySet()){
+			if(s.getId().equals(var))
+				return _variables.get(s);
+		}
+		return null;
+	}
 
 	public Symbol getSymbol() {
 		return _symbol;

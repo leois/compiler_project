@@ -42,6 +42,18 @@ public class Method{
 		_variables.put(symbol, type);
 	}
 	
+	public Type searchByName(String name){
+		for(Symbol s : _variables.keySet()){
+			if(s.getId().equals(name))
+				return _variables.get(s);
+		}
+		for(Symbol s : _arguments.keySet()){
+			if(s.getId().equals(name))
+				return _arguments.get(s);
+		}
+		return null;
+	}
+	
 	public Symbol getMethodName() {
 		return _methodName;
 	}
