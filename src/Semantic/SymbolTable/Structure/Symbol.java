@@ -5,7 +5,7 @@ import java.util.Set;
 public class Symbol {
 	
 	private String _id;
-	private String _line;
+	private int _line;
 	private int _hashCode;
 	
 	public Symbol(String id, int linea){
@@ -49,11 +49,11 @@ public class Symbol {
 	    return _hashCode == other.hashCode();
 	}
 
-	public String getLine() {
+	public int getLine() {
 		return _line;
 	}
 
-	public void setLine(String line) {
+	public void setLine(int line) {
 		this._line = line;
 	}
 }

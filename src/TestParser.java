@@ -1,4 +1,5 @@
 import Scanner.*;
+import Semantic.E;
 import Semantic.Checker.TypeChecker;
 import Semantic.SymbolTable.TableBuilderVisitor;
 import Parser.*;
@@ -28,7 +29,15 @@ public class TestParser {
                 
                 sv.getTable().printTable();
                 System.out.println("========================================================");
-                sv.getTable().printErrors();
+                
+                
+                List<E> errors = new ArrayList<E>();
+                errors.addAll(tc.getErrors());
+                for(E e: errors){
+                	System.out.println(e.mss());
+                }
+                
+                
 				System.out.print("\n");
            
             System.out.print("\nParsing completed"); 

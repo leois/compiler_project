@@ -28,7 +28,7 @@ public class TableBuilderVisitor implements VisitorSymbol {
   // MethodDeclList ml;
   public void visit(ClassDeclSimple n) {
     Symbol symbol = new Symbol(n.i.s, n.getLine());
-    _currentClass = new Clase(symbol, n.getLine());
+    _currentClass = new Clase(symbol, n.i.getLine());
     
     for ( int i = 0; i < n.vl.size(); i++ ) {
     	VarDecl vd = n.vl.get(i);
@@ -50,7 +50,7 @@ public class TableBuilderVisitor implements VisitorSymbol {
   public void visit(ClassDeclExtends n) {
 	    Symbol symbol = new Symbol(n.i.s, n.i.getLine());
 	    Symbol symbol2 = new Symbol(n.j.s, n.j.getLine());
-	    _currentClass = new Clase(symbol, symbol2, n.getLine());
+	    _currentClass = new Clase(symbol, symbol2, n.i.getLine());
 	    
 	    for ( int i = 0; i < n.vl.size(); i++ ) {
 	    	VarDecl vd = n.vl.get(i);
@@ -74,7 +74,7 @@ public class TableBuilderVisitor implements VisitorSymbol {
   public void visit(MethodDecl n) {
   	
   	Symbol symbol = new Symbol(n.i.s, n.i.getLine());
-  	Method method = new Method(symbol, n.getLine());
+  	Method method = new Method(symbol, n.i.getLine());
   	
   	method.setReturnType(n.t);
   	method.setClase(_currentClass.getSymbol());
