@@ -1,14 +1,19 @@
-package AST.Visitor;
+package Semantic.SymbolTable;
 
-import Semantic.Clase;
-import Semantic.Method;
-import Semantic.Symbol;
-import Semantic.Table;
+import Semantic.SymbolTable.Structure.Clase;
+import Semantic.SymbolTable.Structure.Method;
+import Semantic.SymbolTable.Structure.Symbol;
+import Semantic.SymbolTable.Structure.Table;
 import AST.*;
+import AST.Visitor.VisitorSymbol;
 
-public class SymbolVisitor implements VisitorSymbol {
+public class TableBuilderVisitor implements VisitorSymbol {
 	private Clase _currentClass;
-	public Table _table = new Table();
+	private Table _table = new Table();
+	
+	public Table getTable(){
+		return _table;
+	}
 	
   // MainClass m;
   // ClassDeclList cl;

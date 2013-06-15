@@ -1,4 +1,6 @@
 import Scanner.*;
+import Semantic.Checker.TypeChecker;
+import Semantic.SymbolTable.TableBuilderVisitor;
 import Parser.*;
 import AST.*;
 import AST.Visitor.*;
@@ -19,11 +21,14 @@ public class TestParser {
             root = p.parse();
             Program program = (Program)root.value;
                 //program.accept(new PrettyPrintVisitor());
-                SymbolVisitor sv = new SymbolVisitor();
+                TableBuilderVisitor sv = new TableBuilderVisitor();
                 program.accept(sv);
-                sv._table.printTable();
+                TypeChecker tc = new TypeChecker(sv.getTable());
+                program.accept(tc);
+                
+                sv.getTable().printTable();
                 System.out.println("========================================================");
-                sv._table.printErrors();
+                sv.getTable().printErrors();
 				System.out.print("\n");
            
             System.out.print("\nParsing completed"); 

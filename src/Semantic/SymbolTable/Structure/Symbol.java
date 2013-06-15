@@ -1,4 +1,4 @@
-package Semantic;
+package Semantic.SymbolTable.Structure;
 
 import java.util.Set;
 

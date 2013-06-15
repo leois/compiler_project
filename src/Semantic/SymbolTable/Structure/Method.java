@@ -1,9 +1,13 @@
-package Semantic;
+package Semantic.SymbolTable.Structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import Semantic.E;
+import Semantic.ErrorTypes;
+
 
 import AST.Type;
 
@@ -14,26 +18,26 @@ public class Method{
 	private Map<Symbol, Type> _variables;
 	private Symbol _clase;
 	private int _line;
-	private List<Error> _errors;
+	private List<E> _errors;
 	
 	public Method(Symbol method, int line){
 		_methodName = method;
 		_line = line;
 		_arguments = new HashMap<Symbol, Type>();
 		_variables = new HashMap<Symbol, Type>();
-		_errors = new ArrayList<Error>();
+		_errors = new ArrayList<E>();
 	}
 	
 	public void addArgument(Symbol symbol, Type type){
 		if( symbol.isMapped(_arguments.keySet()) ){
-			_errors.add(new Error(Types.ARGUMENT_ALREADY_DEFINED.mss(), type.getLine()));
+			_errors.add(new E(ErrorTypes.ARGUMENT_ALREADY_DEFINED.mss(), type.getLine()));
 		}
 		_arguments.put(symbol, type);
 	}
 	
 	public void addVariable(Symbol symbol, Type type){
 		if( symbol.isMapped(_variables.keySet()) ){
-			_errors.add(new Error(Types.VARIABLE_ALREADY_DEFINED.mss(), type.getLine()));
+			_errors.add(new E(ErrorTypes.VARIABLE_ALREADY_DEFINED.mss(), type.getLine()));
 		}
 		_variables.put(symbol, type);
 	}
@@ -69,7 +73,7 @@ public class Method{
 		this._clase = clase;
 	}
 	
-	public List<Error> getErrors(){
+	public List<E> getErrors(){
 		return _errors;
 	}
 

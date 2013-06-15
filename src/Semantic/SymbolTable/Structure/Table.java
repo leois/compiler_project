@@ -1,22 +1,26 @@
-package Semantic;
+package Semantic.SymbolTable.Structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Semantic.E;
+import Semantic.ErrorTypes;
+
+
 public class Table{
 	private Map<Symbol, Clase> _table;
-	protected List<Error> _errors;
+	protected List<E> _errors;
 	
 	public Table(){
 		_table = new HashMap<Symbol, Clase>();
-		_errors = new ArrayList<Error>();
+		_errors = new ArrayList<E>();
 	}
 	
 	public void add(Symbol symbol, Clase clase){
 		if( symbol.isMapped(_table.keySet() ) ){
-			_errors.add(new Error(Types.CLASS_ALREADY_DEFINED.mss(), clase.getType().getLine()));
+			_errors.add(new E(ErrorTypes.CLASS_ALREADY_DEFINED.mss(), clase.getType().getLine()) );
 		}
 		_table.put(symbol, clase);
 	}
@@ -48,28 +52,28 @@ public class Table{
 	}
 	
 	public void printErrors(){
-		for( Error error : _errors){
+		for( E error : _errors){
 			System.out.println("* " + error.mss());
 		}
 		for( Symbol s : _table.keySet() ){
 			System.out.println("- " + s.getId());	
-			for( Error e : _table.get(s).getErrors() ){
+			for( E e : _table.get(s).getErrors() ){
 				System.out.println("** " + e.mss());
 			}
 			for( Symbol m : _table.get(s).getMethods().keySet() ){
 				System.out.println("-- " + m.getId());
-				for( Error e : _table.get(s).getMethods().get(m).getErrors() ){
+				for( E e : _table.get(s).getMethods().get(m).getErrors() ){
 					System.out.println("*** " + e.mss());
 				}
 			}
 		}
 	}
 
-	public List<Error> getErrors() {
+	public List<E> getErrors() {
 		return _errors;
 	}
 
-	public void setErrors(List<Error> errors) {
+	public void setErrors(List<E> errors) {
 		this._errors = errors;
 	}
 }

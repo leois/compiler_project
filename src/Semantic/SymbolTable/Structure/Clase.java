@@ -1,9 +1,13 @@
-package Semantic;
+package Semantic.SymbolTable.Structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import Semantic.E;
+import Semantic.ErrorTypes;
+
 
 import AST.IdentifierType;
 import AST.Type;
@@ -14,7 +18,7 @@ public class Clase{
 	private Symbol _superClass;
 	private Map<Symbol, Type> _variables;
 	private Map<Symbol, Method> _methods;
-	private List<Error> _errors;
+	private List<E> _errors;
 	
 	public Clase(Symbol symbol, int line){
 		initializeInstanceVariables(symbol, line);
@@ -27,14 +31,14 @@ public class Clase{
 	
 	public void addMethod(Symbol symbol, Method method){
 		if( symbol.isMapped(_methods.keySet()) ){
-			_errors.add(new Error(Types.METHOD_ALREADY_DEFINED.mss(), method.getLine()));
+			_errors.add(new E(ErrorTypes.METHOD_ALREADY_DEFINED.mss(), method.getLine()));
 		}
 		_methods.put(symbol, method);
 	}
 	
 	public void addVariable(Symbol symbol, Type variable){
 		if( symbol.isMapped(_variables.keySet()) ){
-			_errors.add(new Error(Types.VARIABLE_ALREADY_DEFINED.mss(), variable.getLine()));
+			_errors.add(new E(ErrorTypes.VARIABLE_ALREADY_DEFINED.mss(), variable.getLine()));
 		}
 		_variables.put(symbol, variable);
 	}
@@ -84,14 +88,14 @@ public class Clase{
 		_type = new IdentifierType(className.toString(), line);
 		_variables = new HashMap<Symbol, Type>();
 		_methods = new HashMap<Symbol, Method>();
-		_errors = new ArrayList<Error>();
+		_errors = new ArrayList<E>();
 	}
 
-	public List<Error> getErrors() {
+	public List<E> getErrors() {
 		return _errors;
 	}
 
-	public void setErrors(List<Error> errors) {
+	public void setErrors(List<E> errors) {
 		this._errors = errors;
 	}
 }
