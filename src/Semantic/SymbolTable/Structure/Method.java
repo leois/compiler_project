@@ -15,6 +15,7 @@ public class Method{
 	private Symbol _methodName;
 	private Type _returnType;
 	private Map<Symbol, Type> _arguments;
+	private List<Type> _argumentList;
 	private Map<Symbol, Type> _variables;
 	private Symbol _clase;
 	private int _line;
@@ -25,6 +26,7 @@ public class Method{
 		_line = line;
 		_arguments = new HashMap<Symbol, Type>();
 		_variables = new HashMap<Symbol, Type>();
+		_argumentList = new ArrayList<Type>();
 		_errors = new ArrayList<E>();
 	}
 	
@@ -32,6 +34,7 @@ public class Method{
 		if( symbol.isMapped(_arguments.keySet()) ){
 			_errors.add(new E(ErrorTypes.ARGUMENT_ALREADY_DEFINED.mss(), type.getLine()));
 		}
+		_argumentList.add(type);
 		_arguments.put(symbol, type);
 	}
 	
@@ -95,5 +98,13 @@ public class Method{
 
 	public void setLine(int line) {
 		this._line = line;
+	}
+
+	public List<Type> getArgumentList() {
+		return _argumentList;
+	}
+
+	public void setArgumentList(List<Type> argumentList) {
+		this._argumentList = argumentList;
 	}
 }

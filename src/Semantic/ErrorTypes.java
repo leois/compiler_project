@@ -6,7 +6,9 @@ public enum ErrorTypes {
 	ARGUMENT_ALREADY_DEFINED("Method already was defined"),
 	VARIABLE_ALREADY_DEFINED("Variable already was defined"),
 	UNDECLARED_TYPE("Undeclared type"),
-	WRONG_RETURN("Wrong return type");
+	WRONG_RETURN("Wrong return type"),
+	WRONG_NUMBER_ARGUMENTS("Wrong number of arguments"),
+	WRONG_TYPE_ARGUMENT("Wrong type of arguments");
 	
 	private final String _type;
 	private ErrorTypes(String type){

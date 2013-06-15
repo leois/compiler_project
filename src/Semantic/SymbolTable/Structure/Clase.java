@@ -51,10 +51,10 @@ public class Clase{
 		return null;
 	}
 	
-	public Type searchMethodTypeByName(String var){
+	public Method searchMethodByName(String met){
 		for(Symbol s : _methods.keySet()){
-			if(s.getId().equals(var))
-				return _methods.get(s).getReturnType();
+			if(s.getId().equals(met))
+				return _methods.get(s);
 		}
 		return null;
 	}

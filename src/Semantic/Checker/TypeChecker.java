@@ -125,6 +125,38 @@ public class TypeChecker implements Visitor{
 		}
 	}
 	
+	private void checkParameters(Method method, ExpList expressions, int line){
+		//amount
+		if(method.getArgumentList().size() == expressions.size()){
+			boolean same = false;
+			for(int i=0; i<expressions.size(); i++){
+				same = false;
+				expressions.get(i).accept(this);
+				same = typeOfExpression(method.getArgumentList().get(i));	
+				if( !same ){
+					_errors.add(new E(ErrorTypes.WRONG_TYPE_ARGUMENT.mss(), line));
+				}
+			}
+		}else{
+			_errors.add(new E(ErrorTypes.WRONG_NUMBER_ARGUMENTS.mss(), line));
+		}
+	}
+	
+	private boolean typeOfExpression(Type type){
+		boolean same = false;
+		if(type.getClass().isAssignableFrom(IdentifierType.class) && _returnType != null &&
+				_returnType.getClass().isAssignableFrom(IdentifierType.class)){
+			IdentifierType id1 = (IdentifierType) type;
+			IdentifierType id2 = (IdentifierType) _returnType;
+			if(id1.s.equals(id2.s)) 
+				same = true;
+			
+		}else if(_returnType != null ){
+			same = type.getClass().isAssignableFrom(_returnType.getClass());
+		}
+		return same;
+	}
+	
 	private void checkType(Symbol s, Set<Symbol> types){
 		boolean defined = s.isMapped(_table.getTable().keySet());
 		if( !defined )
@@ -143,23 +175,37 @@ public class TypeChecker implements Visitor{
 	}
 	
 	private void checkReturnType(Type type, Exp e){
-		boolean same = false;
 		e.accept(this);
-		if(type.getClass().isAssignableFrom(IdentifierType.class) && _returnType != null &&
-				_returnType.getClass().isAssignableFrom(IdentifierType.class)){
-			IdentifierType id1 = (IdentifierType) type;
-			IdentifierType id2 = (IdentifierType) _returnType;
-			if(id1.s.equals(id2.s)) 
-				same = true;
-			
-		}else if(_returnType != null ){
-			same = type.getClass().isAssignableFrom(_returnType.getClass());
-		}
+		boolean same = typeOfExpression(type);
 		
 		if( !same ){
 			_errors.add(new E(ErrorTypes.WRONG_RETURN.mss(), e.getLine()));
 		}
-		
+	}
+	
+	private Type searchVariableType(String var){
+		Method method = _table.getTable().get(_currentClass).getMethods().get(_currentMethod);
+		Type t = method.searchByName(var);
+		if( t == null ){
+			Clase clase = _table.getTable().get(_currentClass);
+			do{
+				t = clase.searchVariableByName(var);
+				clase = _table.getTable().get(clase.getSuperClass());
+			}while(t == null && clase != null);
+		}
+		return t;
+	}
+	
+	private Method searchMethodByName(Clase c, String met){
+		Method m = c.searchMethodByName(met);
+		if(m == null && c.getSuperClass() != null){
+			c = _table.searchClassByName(c.getSuperClass().getId());
+			do{
+				m = c.searchMethodByName(met);
+				c = (c.getSuperClass() != null)? _table.searchClassByName(c.getSuperClass().getId()) : null;
+			}while(m == null && c != null);
+		}
+		return m;
 	}
 
 	@Override
@@ -239,22 +285,17 @@ public class TypeChecker implements Visitor{
 		}else if(_returnExpression.getClass().isAssignableFrom(This.class)){
 			c = _table.getTable().get(_currentClass);
 		}
-		
-		_returnType =  (c != null)? searchMethodTypeByName(c, n.i.s) : null;
-				
-		_returnExpression = n;
-	}
-	
-	private Type searchMethodTypeByName(Clase c, String met){
-		Type t = c.searchMethodTypeByName(met);
-		if(t == null && c.getSuperClass() != null){
-			c = _table.searchClassByName(c.getSuperClass().getId());
-			do{
-				t = c.searchMethodTypeByName(met);
-				c = _table.getTable().get(c.getSuperClass());
-			}while(t == null && c != null);
+		Type rt = _returnType;
+		if( c != null){
+			Method method = searchMethodByName(c, n.i.s);
+			_returnType =  (method != null)? method.getReturnType() : null;
+			
+			checkParameters(method, n.el, n.getLine());
+			
+		}else{
+			_returnType = null;
 		}
-		return t;
+		_returnType = rt;
 	}
 
 
@@ -281,19 +322,6 @@ public class TypeChecker implements Visitor{
 		_returnExpression = n;
 		Type t = searchVariableType(n.s);
 		_returnType = t;
-	}
-	
-	private Type searchVariableType(String var){
-		Method method = _table.getTable().get(_currentClass).getMethods().get(_currentMethod);
-		Type t = method.searchByName(var);
-		if( t == null ){
-			Clase clase = _table.getTable().get(_currentClass);
-			do{
-				t = clase.searchVariableByName(var);
-				clase = _table.getTable().get(clase.getSuperClass());
-			}while(t == null && clase != null);
-		}
-		return t;
 	}
 
 
