@@ -57,6 +57,14 @@ public class Method{
 		return null;
 	}
 	
+	public Type getVarType(String name){
+		for(Symbol s : _variables.keySet()){
+			if(s.getId().equals(name))
+				return _variables.get(s);
+		}
+		return null;
+	}
+	
 	public Symbol getMethodName() {
 		return _methodName;
 	}

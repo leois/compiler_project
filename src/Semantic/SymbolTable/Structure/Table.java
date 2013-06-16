@@ -41,6 +41,15 @@ public class Table{
 		return null;
 	}
 	
+	public Method getMethod(String method, String clase){
+		Method m = null;
+		Clase c = searchClassByName(clase);
+		if( c != null ){
+			m = c.searchMethodByName(method);
+		}
+		return m;
+	}
+	
 	public void printTable(){
 		for( Symbol s : _table.keySet() ){
 			System.out.println("- " + s.getId());	

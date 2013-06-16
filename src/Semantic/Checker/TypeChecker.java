@@ -253,6 +253,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
 		}
 		_returnType = new BooleanType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -269,6 +270,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
 		}
 		_returnType = new BooleanType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -285,6 +287,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
 		}
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -301,6 +304,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
 		}
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -317,6 +321,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
 		}
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -333,6 +338,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
 		}
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -344,6 +350,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_ARRAY, n.getLine()));
 		}
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -378,26 +385,28 @@ public class TypeChecker implements Visitor{
 			rt = null;
 		}
 		_returnType = rt;
-		
-		
+		n.e.setType(_returnType);
 	}
 
 
 	@Override
 	public void visit(IntegerLiteral n) {
 		_returnType = new IntegerType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
 	@Override
 	public void visit(True n) {
 		_returnType = new BooleanType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
 	@Override
 	public void visit(False n) {
 		_returnType = new BooleanType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -406,6 +415,7 @@ public class TypeChecker implements Visitor{
 		_returnExpression = n;
 		Type t = searchVariableType(n.s);
 		_returnType = t;
+		n.setType(_returnType);
 	}
 
 
@@ -413,6 +423,7 @@ public class TypeChecker implements Visitor{
 	public void visit(This n) {
 		_returnExpression = n;
 		_returnType = new IdentifierType(_currentClass.getId(), n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -420,6 +431,7 @@ public class TypeChecker implements Visitor{
 	public void visit(NewArray n) {
 		_returnExpression = n;
 		_returnType = new IntArrayType(n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -431,6 +443,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.UNDECLARED_TYPE, n.getLine()));
 		}
 		_returnType = new IdentifierType(n.i.s, n.getLine());
+		n.setType(_returnType);
 	}
 
 
@@ -444,6 +457,7 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
 		}
 		_returnType = new BooleanType(n.getLine());
+		n.setType(_returnType);
 	}
 
 

@@ -5,6 +5,7 @@ import Semantic.SymbolTable.TableBuilderVisitor;
 import Parser.*;
 import AST.*;
 import AST.Visitor.*;
+import Generation.Generator;
 import java_cup.runtime.Symbol;
 
 import java.io.FileReader;
@@ -14,7 +15,7 @@ public class TestParser {
     public static void main(String [] args) {
         try {
             // create a scanner on the input file
-            scanner s = new scanner(new FileReader("C://Users//Leois Linka//Desktop//ejemplos//LinkedList.java"));
+            scanner s = new scanner(new FileReader("C://Users//Leois Linka//Desktop//ejemplos//mio.java"));
             parser p = new parser(s);
             Symbol root;
 	    // replace p.parse() with p.debug_parse() in next line to see trace of
@@ -26,6 +27,8 @@ public class TestParser {
                 program.accept(sv);
                 TypeChecker tc = new TypeChecker(sv.getTable());
                 program.accept(tc);
+                Generator g = new Generator(sv.getTable());
+                program.accept(g);
                 
                 //sv.getTable().printTable();
                 System.out.println("========================================================");
