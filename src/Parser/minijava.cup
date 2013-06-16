@@ -263,7 +263,23 @@ Statement ::=	LBRACE:lb RBRACE
 			|	Identifier:id LBRACKET Expression:exp1 RBRACKET BECOMES Expression:exp2 SEMICOLON 
 					{: RESULT = new ArrayAssign(id, exp1, exp2, idleft); :};															
 				
-Expression ::=	Expression:exp1 AND Expression:exp2
+Expression ::=	
+				IDENTIFIER:id
+					{:RESULT = new IdentifierExp(id, idleft); :}
+			
+			|	THIS:t
+					{:RESULT = new This(tleft); :}
+			|	NEW:n INT LBRACKET Expression:exp RBRACKET
+					{:RESULT = new NewArray(exp, nleft); :}							
+			|	NEW Identifier:id LPAREN RPAREN
+					{:RESULT = new NewObject(id, idleft); :}				
+			|	Expression:exp DOT LENGTH
+					{: RESULT = new ArrayLength(exp, expleft); :}
+			|	Expression:exp DOT Identifier:id LPAREN RPAREN
+					{: RESULT = new Call(exp, id, new ExpList(expleft), expleft); :}
+			|	Expression:exp DOT Identifier:id LPAREN ExpressionList:el RPAREN
+					{: RESULT = new Call(exp, id, el, expleft); :}
+			|	Expression:exp1 AND Expression:exp2
 					{: RESULT = new And(exp1, exp2, exp1left); :}
 			|	Expression:exp1 LESSTHAN Expression:exp2
 					{: RESULT = new LessThan(exp1, exp2, exp1left); :}
@@ -274,31 +290,17 @@ Expression ::=	Expression:exp1 AND Expression:exp2
 			|	Expression:exp1 MULTIPLIER Expression:exp2
 					{: RESULT = new Times(exp1, exp2, exp1left); :}
 			|	Expression:exp1 LBRACKET Expression:exp2 RBRACKET
-					{: RESULT = new ArrayLookup(exp1, exp2, exp1left); :}		
-			|	Expression:exp DOT LENGTH
-					{: RESULT = new ArrayLength(exp, expleft); :}
-			|	Expression:exp DOT Identifier:id LPAREN RPAREN
-					{: RESULT = new Call(exp, id, new ExpList(expleft), expleft); :}
-			|	Expression:exp DOT Identifier:id LPAREN ExpressionList:el RPAREN
-					{: RESULT = new Call(exp, id, el, expleft); :}														
+					{: RESULT = new ArrayLookup(exp1, exp2, exp1left); :}																
 			|	NUMBER:n
 					{: RESULT = new IntegerLiteral(n, nleft); :}
 			|	TRUE:t
 					{: RESULT = new True(tleft); :}		
 			|	FALSE:f
-					{:RESULT = new False(fleft); :}
-			|	IDENTIFIER:id
-					{:RESULT = new IdentifierExp(id, idleft); :}		
-			|	THIS:t
-					{:RESULT = new This(tleft); :}
-			|	NEW:n INT LBRACKET Expression:exp RBRACKET
-					{:RESULT = new NewArray(exp, nleft); :}							
-			|	NEW Identifier:id LPAREN RPAREN
-					{:RESULT = new NewObject(id, idleft); :}		
-			|	NOT Expression:exp
-					{:RESULT = new Not(exp, expleft); :}
+					{:RESULT = new False(fleft); :}		
 			|	LPAREN Expression:exp RPAREN
-					{:RESULT = exp; :};
+					{:RESULT = exp; :}
+			|	NOT Expression:exp
+					{:RESULT = new Not(exp, expleft); :};
 					
 					
 ExpressionList ::= 	Expression:exp

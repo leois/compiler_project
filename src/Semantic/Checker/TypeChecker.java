@@ -31,6 +31,7 @@ public class TypeChecker implements Visitor{
 	// MainClass m;
 	// ClassDeclList0 cl;
 	public void visit(Program n) {
+		n.m.accept(this);
 		for ( int i = 0; i < n.cl.size(); i++ ) {
 		  n.cl.get(i).accept(this);
 	  	}
@@ -90,6 +91,11 @@ public class TypeChecker implements Visitor{
 	  	checkArguments(n.fl, method.getArguments(), _table.getTable().keySet());
 	    
 	    checkVariables(n.vl, method.getVariables(), _table.getTable().keySet());
+	    
+	    for(int i=0; i<n.sl.size(); i++){
+	    	n.sl.get(i).accept(this);
+	    }
+	    
 	    _currentMethod = null;
 	}
 
@@ -281,19 +287,19 @@ public class TypeChecker implements Visitor{
 		}else if(_returnExpression.getClass().isAssignableFrom(IdentifierExp.class)){
 			IdentifierExp ie = (IdentifierExp) _returnExpression;
 			IdentifierType t = (IdentifierType) searchVariableType(ie.s);
-			c = _table.searchClassByName(t.s);
+			if( t!= null)
+				c = _table.searchClassByName(t.s);
 		}else if(_returnExpression.getClass().isAssignableFrom(This.class)){
 			c = _table.getTable().get(_currentClass);
 		}
-		Type rt = _returnType;
+		Type rt = null;
 		if( c != null){
 			Method method = searchMethodByName(c, n.i.s);
-			_returnType =  (method != null)? method.getReturnType() : null;
-			
+			rt =  (method != null)? method.getReturnType() : null;
 			checkParameters(method, n.el, n.getLine());
 			
 		}else{
-			_returnType = null;
+			rt = null;
 		}
 		_returnType = rt;
 	}
@@ -348,6 +354,11 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(Not n) {
+		n.e.accept(this);
+		boolean isBoolean = typeOfExpression(new BooleanType(n.getLine()));
+		if( !isBoolean ){
+			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
+		}
 		_returnType = new BooleanType(n.getLine());
 	}
 
@@ -361,8 +372,7 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(MainClass n) {
-		// TODO Auto-generated method stub
-		
+		n.s.accept(this);
 	}
 
 
@@ -410,15 +420,30 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(Assign n) {
-		// TODO Auto-generated method stub
-		
+		n.e.accept(this);
+		Type type = searchVariableType(n.i.s);
+		boolean same = typeOfExpression(type);
+		if( !same ){
+			_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+		}
 	}
 
 
 	@Override
 	public void visit(ArrayAssign n) {
-		// TODO Auto-generated method stub
-		
+		Type type = searchVariableType(n.i.s);
+		if(type.getClass().isAssignableFrom(IntArrayType.class)){
+			n.e1.accept(this);
+			boolean b1 = typeOfExpression(new IntegerType(n.getLine()));
+			n.e2.accept(this);
+			boolean b2 = typeOfExpression(new IntegerType(n.getLine()));
+			if( !b1)
+				_errors.add(new E(ErrorTypes.WRONG_INDEX, n.getLine()));
+			if( !b2)
+				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+		}else{
+			_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN.mss(), n.getLine()));
+		}
 	}
 
 
