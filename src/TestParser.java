@@ -14,7 +14,7 @@ public class TestParser {
     public static void main(String [] args) {
         try {
             // create a scanner on the input file
-            scanner s = new scanner(new FileReader("C://Users//Leois Linka//Desktop//ejemplos//TreeVisitor.java"));
+            scanner s = new scanner(new FileReader("C://Users//Leois Linka//Desktop//ejemplos//LinkedList.java"));
             parser p = new parser(s);
             Symbol root;
 	    // replace p.parse() with p.debug_parse() in next line to see trace of
@@ -27,11 +27,11 @@ public class TestParser {
                 TypeChecker tc = new TypeChecker(sv.getTable());
                 program.accept(tc);
                 
-                sv.getTable().printTable();
+                //sv.getTable().printTable();
                 System.out.println("========================================================");
                 
                 
-                List<E> errors = new ArrayList<E>();
+                List<E> errors = sv.getTable().getAllErrors();
                 errors.addAll(tc.getErrors());
                 for(E e: errors){
                 	System.out.println(e.mss());

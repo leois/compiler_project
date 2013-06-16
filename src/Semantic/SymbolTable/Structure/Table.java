@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import AST.Type;
 import Semantic.E;
 import Semantic.ErrorTypes;
 
@@ -58,6 +57,17 @@ public class Table{
 				}
 			}
 		}
+	}
+	
+	public List<E> getAllErrors(){
+		List<E> _all = _errors;
+		for( Symbol s : _table.keySet() ){
+			_all.addAll(_table.get(s).getErrors());	
+			for( Symbol m : _table.get(s).getMethods().keySet() ){
+				_all.addAll(_table.get(s).getMethods().get(m).getErrors());
+			}
+		}
+		return _errors;
 	}
 	
 	public void printErrors(){

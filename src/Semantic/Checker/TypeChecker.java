@@ -435,7 +435,9 @@ public class TypeChecker implements Visitor{
 
 
 	@Override
-	public void visit(Not n) {
+	public void visit(Not n) { 
+		if(n.getLine() == 45)
+			System.out.println();
 		n.e.accept(this);
 		boolean isBoolean = typeOfExpression(new BooleanType(n.getLine()));
 		if( !isBoolean ){

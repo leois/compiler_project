@@ -267,8 +267,7 @@ Expression ::=
 				IDENTIFIER:id
 					{:RESULT = new IdentifierExp(id, idleft); :}
 			
-			|	THIS:t
-					{:RESULT = new This(tleft); :}
+			
 			|	NEW:n INT LBRACKET Expression:exp RBRACKET
 					{:RESULT = new NewArray(exp, nleft); :}							
 			|	NEW Identifier:id LPAREN RPAREN
@@ -300,7 +299,9 @@ Expression ::=
 			|	LPAREN Expression:exp RPAREN
 					{:RESULT = exp; :}
 			|	NOT Expression:exp
-					{:RESULT = new Not(exp, expleft); :};
+					{:RESULT = new Not(exp, expleft); :}
+					|	THIS:t
+					{:RESULT = new This(tleft); :};
 					
 					
 ExpressionList ::= 	Expression:exp
