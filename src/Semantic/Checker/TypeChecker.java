@@ -147,15 +147,20 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.WRONG_NUMBER_ARGUMENTS.mss(), line));
 		}
 	}
-	
+	int i = 0;
 	private boolean typeOfExpression(Type type){
 		boolean same = false;
 		if(type.getClass().isAssignableFrom(IdentifierType.class) && _returnType != null &&
 				_returnType.getClass().isAssignableFrom(IdentifierType.class)){
 			IdentifierType id1 = (IdentifierType) type;
 			IdentifierType id2 = (IdentifierType) _returnType;
-			if(id1.s.equals(id2.s)) 
-				same = true;
+			Clase c = null;
+			do{
+				same = id1.s.equals(id2.s);
+				c = _table.searchClassByName(id2.s);
+				if(c.getSuperClass() != null)
+					id2 = new IdentifierType(c.getSuperClass().getId(), id2.getLine());
+			}while( !same && c.getSuperClass() != null);
 			
 		}else if(_returnType != null ){
 			same = type.getClass().isAssignableFrom(_returnType.getClass());
@@ -196,7 +201,8 @@ public class TypeChecker implements Visitor{
 			Clase clase = _table.getTable().get(_currentClass);
 			do{
 				t = clase.searchVariableByName(var);
-				clase = _table.getTable().get(clase.getSuperClass());
+				clase = (clase.getSuperClass() != null)? 
+						_table.searchClassByName(clase.getSuperClass().getId()) : null;
 			}while(t == null && clase != null);
 		}
 		return t;
@@ -236,42 +242,107 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(And n) {
+		n.e1.accept(this);
+		boolean isBoolean = typeOfExpression(new BooleanType(n.getLine()));
+		if(!isBoolean){
+			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
+		}
+		n.e2.accept(this);
+		isBoolean = typeOfExpression(new BooleanType(n.getLine()));
+		if(!isBoolean){
+			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
+		}
 		_returnType = new BooleanType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(LessThan n) {
+		n.e1.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
+		n.e2.accept(this);
+		isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 		_returnType = new BooleanType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(Plus n) {
+		n.e1.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
+		n.e2.accept(this);
+		isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 		_returnType = new IntegerType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(Minus n) {
+		n.e1.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
+		n.e2.accept(this);
+		isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 		_returnType = new IntegerType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(Times n) {
+		n.e1.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
+		n.e2.accept(this);
+		isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 		_returnType = new IntegerType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(ArrayLookup n) {
+		n.e1.accept(this);
+		boolean isArray = typeOfExpression(new IntArrayType(n.getLine()));
+		if(!isArray){
+			_errors.add(new E(ErrorTypes.NOT_ARRAY, n.getLine()));
+		}
+		n.e2.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if(!isInteger){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 		_returnType = new IntegerType(n.getLine());
 	}
 
 
 	@Override
 	public void visit(ArrayLength n) {
+		n.e.accept(this);
+		boolean isArray = typeOfExpression(new IntArrayType(n.getLine()));
+		if(!isArray){
+			_errors.add(new E(ErrorTypes.NOT_ARRAY, n.getLine()));
+		}
 		_returnType = new IntegerType(n.getLine());
 	}
 
@@ -295,13 +366,20 @@ public class TypeChecker implements Visitor{
 		Type rt = null;
 		if( c != null){
 			Method method = searchMethodByName(c, n.i.s);
-			rt =  (method != null)? method.getReturnType() : null;
-			checkParameters(method, n.el, n.getLine());
+			if( method != null){
+				rt =  method.getReturnType();
+				checkParameters(method, n.el, n.getLine());
+			}else{
+				_errors.add(new E(ErrorTypes.UNDECLARED_METHOD, n.getLine()));
+			}
+			
 			
 		}else{
 			rt = null;
 		}
 		_returnType = rt;
+		
+		
 	}
 
 
@@ -348,6 +426,10 @@ public class TypeChecker implements Visitor{
 	@Override
 	public void visit(NewObject n) {
 		_returnExpression = n;
+		Clase c = _table.searchClassByName(n.i.s);
+		if(c == null){
+			_errors.add(new E(ErrorTypes.UNDECLARED_TYPE, n.getLine()));
+		}
 		_returnType = new IdentifierType(n.i.s, n.getLine());
 	}
 
@@ -365,8 +447,7 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(Display n) {
-		// TODO Auto-generated method stub
-		
+		n.e.accept(this);
 	}
 
 
@@ -377,54 +458,68 @@ public class TypeChecker implements Visitor{
 
 
 	@Override
-	public void visit(VarDecl n) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void visit(VarDecl n) {}
 
 
 	@Override
-	public void visit(Formal n) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void visit(Formal n) {}
 
 
 	@Override
 	public void visit(Block n) {
-		// TODO Auto-generated method stub
-		
+		for(int i=0; i<n.sl.size(); i++){
+			n.sl.get(i).accept(this);
+		}
 	}
 
 
 	@Override
 	public void visit(If n) {
-		// TODO Auto-generated method stub
-		
+		n.e.accept(this);
+		boolean isBoolean = typeOfExpression(new BooleanType(n.getLine()));
+		if(!isBoolean){
+			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
+		}
+		n.s1.accept(this);
+		n.s2.accept(this);
 	}
 
 
 	@Override
 	public void visit(While n) {
-		// TODO Auto-generated method stub
-		
+		n.e.accept(this);
+		boolean isBoolean = typeOfExpression(new BooleanType(n.getLine()));
+		if(!isBoolean){
+			_errors.add(new E(ErrorTypes.NOT_BOOLEAN, n.getLine()));
+		}
+		n.s.accept(this);
 	}
 
 
 	@Override
 	public void visit(Print n) {
 		// TODO Auto-generated method stub
-		
+		n.e.accept(this);
+		boolean isInteger = typeOfExpression(new IntegerType(n.getLine()));
+		if( !isInteger ){
+			_errors.add(new E(ErrorTypes.NOT_INTEGER, n.getLine()));
+		}
 	}
 
 
 	@Override
 	public void visit(Assign n) {
+		if(n.getLine() == 361)
+			System.out.println();
 		n.e.accept(this);
 		Type type = searchVariableType(n.i.s);
-		boolean same = typeOfExpression(type);
-		if( !same ){
-			_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+		if( type != null){
+			boolean same = typeOfExpression(type);
+			if( !same ){
+				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+			}
+		}else{
+			_errors.add(new E(ErrorTypes.UNDECLARED_VARIABLE, n.getLine()));
 		}
 	}
 
@@ -432,31 +527,29 @@ public class TypeChecker implements Visitor{
 	@Override
 	public void visit(ArrayAssign n) {
 		Type type = searchVariableType(n.i.s);
-		if(type.getClass().isAssignableFrom(IntArrayType.class)){
-			n.e1.accept(this);
-			boolean b1 = typeOfExpression(new IntegerType(n.getLine()));
-			n.e2.accept(this);
-			boolean b2 = typeOfExpression(new IntegerType(n.getLine()));
-			if( !b1)
-				_errors.add(new E(ErrorTypes.WRONG_INDEX, n.getLine()));
-			if( !b2)
-				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+		if( type != null){
+			if(type.getClass().isAssignableFrom(IntArrayType.class)){
+				n.e1.accept(this);
+				boolean b1 = typeOfExpression(new IntegerType(n.getLine()));
+				n.e2.accept(this);
+				boolean b2 = typeOfExpression(new IntegerType(n.getLine()));
+				if( !b1)
+					_errors.add(new E(ErrorTypes.WRONG_INDEX, n.getLine()));
+				if( !b2)
+					_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
+			}else{
+				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN.mss(), n.getLine()));
+			}
 		}else{
-			_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN.mss(), n.getLine()));
+			_errors.add(new E(ErrorTypes.UNDECLARED_VARIABLE.mss(), n.getLine()));
 		}
 	}
 
 
 	@Override
-	public void visit(Identifier n) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void visit(Identifier n) {}
 
 
 	@Override
-	public void visit(Empty n) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void visit(Empty n) {}
 }

@@ -11,7 +11,11 @@ public enum ErrorTypes {
 	WRONG_TYPE_ARGUMENT("Wrong type of arguments"),
 	WRONG_TYPE_ASSIGN("Wrong type assignment"),
 	WRONG_INDEX("Wrong index"),
-	NOT_BOOLEAN("Not a boolean");
+	NOT_BOOLEAN("Not a boolean"),
+	NOT_INTEGER("Not an integer"),
+	NOT_ARRAY("Not an array"),
+	UNDECLARED_VARIABLE("Undelcared variable"),
+	UNDECLARED_METHOD("Undeclared method");
 	
 	private final String _type;
 	private ErrorTypes(String type){
