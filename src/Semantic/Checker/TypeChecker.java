@@ -365,8 +365,9 @@ public class TypeChecker implements Visitor{
 		}else if(_returnExpression.getClass().isAssignableFrom(IdentifierExp.class)){
 			IdentifierExp ie = (IdentifierExp) _returnExpression;
 			IdentifierType t = (IdentifierType) searchVariableType(ie.s);
-			if( t!= null)
+			if( t!= null){
 				c = _table.searchClassByName(t.s);
+			}
 		}else if(_returnExpression.getClass().isAssignableFrom(This.class)){
 			c = _table.getTable().get(_currentClass);
 		}
@@ -376,6 +377,7 @@ public class TypeChecker implements Visitor{
 			if( method != null){
 				rt =  method.getReturnType();
 				checkParameters(method, n.el, n.getLine());
+				n.setType(rt);
 			}else{
 				_errors.add(new E(ErrorTypes.UNDECLARED_METHOD, n.getLine()));
 			}
@@ -385,7 +387,6 @@ public class TypeChecker implements Visitor{
 			rt = null;
 		}
 		_returnType = rt;
-		n.e.setType(_returnType);
 	}
 
 
@@ -525,13 +526,19 @@ public class TypeChecker implements Visitor{
 
 	@Override
 	public void visit(Assign n) {
-		if(n.getLine() == 361)
-			System.out.println();
 		n.e.accept(this);
 		Type type = searchVariableType(n.i.s);
 		if( type != null){
 			boolean same = typeOfExpression(type);
-			if( !same ){
+			if ( same && _returnExpression instanceof NewObject ){
+				NewObject no = (NewObject) _returnExpression;
+				type = no.getType();
+				if ( _currentMethod != null ){
+					_table.getTable().get(_currentClass).getMethods().get(_currentMethod).setVarType(n.i.s, type);
+				}else{
+					_table.getTable().get(_currentClass).setVarType(n.i.s, type);
+				}
+			}else{
 				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
 			}
 		}else{

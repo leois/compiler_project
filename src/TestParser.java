@@ -25,25 +25,29 @@ public class TestParser {
                 //program.accept(new PrettyPrintVisitor());
                 TableBuilderVisitor sv = new TableBuilderVisitor();
                 program.accept(sv);
-                TypeChecker tc = new TypeChecker(sv.getTable());
-                program.accept(tc);
-                Generator g = new Generator(sv.getTable());
-                program.accept(g);
                 
-                //sv.getTable().printTable();
-                System.out.println("========================================================");
-                
-                
+                System.out.println("===============Table Builder=================");
                 List<E> errors = sv.getTable().getAllErrors();
-                errors.addAll(tc.getErrors());
-                for(E e: errors){
-                	System.out.println(e.mss());
+                printErrors(errors);
+                
+                if ( errors.isEmpty() ){
+                	TypeChecker tc = new TypeChecker(sv.getTable());
+                    program.accept(tc);
+                    System.out.println("===============Type Checker==================");
+                    errors = tc.getErrors();
+                    printErrors(errors);
+                    
+                    if ( errors.isEmpty() ){
+                    	Generator g = new Generator(sv.getTable());
+                        program.accept(g);
+                        System.out.println("===============Code Generator=================");
+                        System.out.println("Ok!");
+                        System.out.println("COMPLETED!");
+                    }
                 }
                 
                 
-				System.out.print("\n");
-           
-            System.out.print("\nParsing completed"); 
+				System.out.print("\n"); 
         } catch (Exception e) {
             // yuck: some kind of error in the compiler implementation
             // that we're not expecting (a bug!)
@@ -52,5 +56,14 @@ public class TestParser {
             // print out a stack dump
             e.printStackTrace();
         }
+    }
+    
+    public static void printErrors(List<E> errors){
+    	boolean has = false;
+    	for(E e: errors){
+        	System.out.println(e.mss());
+        	has = true;
+        }
+    	if ( !has ) System.out.println("OK!");
     }
 }
