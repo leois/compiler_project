@@ -147,6 +147,23 @@ public class TypeChecker implements Visitor{
 			_errors.add(new E(ErrorTypes.WRONG_NUMBER_ARGUMENTS.mss(), line));
 		}
 	}
+	
+	private boolean sameSignature(Method method, ExpList expressions, int line){
+		//amount
+		if(method.getArgumentList().size() == expressions.size()){
+			boolean same = false;
+			for(int i=0; i<expressions.size(); i++){
+				same = false;
+				expressions.get(i).accept(this);
+				same = typeOfExpression(method.getArgumentList().get(i));	
+				if( !same ) return false;
+			}
+		}else{
+			return false;
+		}
+		return true;
+	}
+	
 	int i = 0;
 	private boolean typeOfExpression(Type type){
 		boolean same = false;
@@ -373,15 +390,39 @@ public class TypeChecker implements Visitor{
 		}
 		Type rt = null;
 		if( c != null){
-			Method method = searchMethodByName(c, n.i.s);
-			if( method != null){
-				rt =  method.getReturnType();
-				checkParameters(method, n.el, n.getLine());
-				n.setType(rt);
-			}else{
-				_errors.add(new E(ErrorTypes.UNDECLARED_METHOD, n.getLine()));
-			}
 			
+			Method first = searchMethodByName(c, n.i.s);
+			Method method = first;
+			boolean cont = true;
+			boolean checked = false;
+			do{
+				method = searchMethodByName(c, n.i.s);
+				if( method!= null ){
+					boolean signature = sameSignature(method, n.el, n.getLine());
+					if ( signature ){
+						cont = false;
+						rt =  method.getReturnType();
+						checkParameters(method, n.el, n.getLine());
+						n.setType(rt);
+						checked = true;
+					}else{
+						//try to find on superclass
+						if ( c.getSuperClass() != null ){
+							c = _table.searchClassByName(c.getSuperClass().getId());
+						}else{
+							cont = false;
+						}
+					}
+				}else{
+					cont = false;
+				}
+				
+			} while ( cont );
+			if ( first == null ){
+				_errors.add(new E(ErrorTypes.UNDECLARED_METHOD, n.getLine()));
+			}else if ( !checked ){
+				checkParameters(first, n.el, n.getLine());
+			}
 			
 		}else{
 			rt = null;
@@ -538,7 +579,7 @@ public class TypeChecker implements Visitor{
 				}else{
 					_table.getTable().get(_currentClass).setVarType(n.i.s, type);
 				}
-			}else{
+			}else if ( !same ){
 				_errors.add(new E(ErrorTypes.WRONG_TYPE_ASSIGN, n.getLine()));
 			}
 		}else{
