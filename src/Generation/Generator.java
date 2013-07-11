@@ -10,11 +10,13 @@ public class Generator implements Visitor {
 	private Table _table;
 	private String _currentClass;
 	private String _currentMethod;
+	private String _dir;
 
 	private int stackSize, maxStackSize;
 
-	public Generator(Table table) {
+	public Generator(Table table, String folder) {
 		_table = table;
+		_dir = folder;
 	}
 
 	private void resetStack() {
@@ -37,7 +39,7 @@ public class Generator implements Visitor {
 	private void decrStack(int n) {
 		stackSize -= n;
 		if (stackSize < 0)
-			throw new IllegalArgumentException("BytecodeEmitter::decrStack");
+			throw new IllegalArgumentException("Generator::decrStack");
 	}
 
 	private void saveStack() {
@@ -45,7 +47,7 @@ public class Generator implements Visitor {
 		JasminAux.directive(".limit stack " + maxStackSize);
 
 		if (stackSize != 0)
-			throw new IllegalArgumentException("BytecodeEmitter::saveStack");
+			throw new IllegalArgumentException("Generator::saveStack");
 	}
 
 	private void emitStandardConstructor(String baseClass) {
@@ -134,7 +136,7 @@ public class Generator implements Visitor {
 
 	public void visit(MainClass n) {
 //		String claseName = n.i1.s;
-//		JasminAux.setClassName(claseName);
+//		JasminAux.setClassName(_dir + claseName);
 //		_currentClass = claseName;
 //
 //		JasminAux.directive(".class public " + claseName);
@@ -172,7 +174,7 @@ public class Generator implements Visitor {
 		String claseName = n.i.s;
 		String superClase = n.j.s;
 		_currentClass = claseName;
-		JasminAux.setClassName(claseName);
+		JasminAux.setClassName(_dir+claseName);
 
 		JasminAux.directive(".class public " + claseName);
 		JasminAux.directive(".super " + superClase);

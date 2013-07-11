@@ -15,7 +15,9 @@ public class TestParser {
     public static void main(String [] args) {
         try {
             // create a scanner on the input file
-            scanner s = new scanner(new FileReader("C://Users//Leois Linka//Desktop//ejemplos//mio.java"));
+        	String dir = "C://Users//Leois Linka//Desktop//ejemplos//";
+        	String file = "mio.java";
+            scanner s = new scanner(new FileReader(dir+file));
             parser p = new parser(s);
             Symbol root;
 	    // replace p.parse() with p.debug_parse() in next line to see trace of
@@ -38,7 +40,7 @@ public class TestParser {
                     printErrors(errors);
                     
                     if ( errors.isEmpty() ){
-                    	Generator g = new Generator(sv.getTable());
+                    	Generator g = new Generator(sv.getTable(), dir);
                         program.accept(g);
                         System.out.println("===============Code Generator=================");
                         System.out.println("Ok!");
