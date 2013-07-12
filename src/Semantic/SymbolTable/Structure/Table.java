@@ -35,8 +35,10 @@ public class Table{
 	
 	public Clase searchClassByName(String var){
 		for(Symbol s : _table.keySet()){
-			if(s.getId().equals(var))
+			if(s.getId().equals(var)){
+				s.used();
 				return _table.get(s);
+			}
 		}
 		return null;
 	}
@@ -78,6 +80,33 @@ public class Table{
 		}
 		return _errors;
 	}
+	
+	public void printAllUnused(){
+		
+		HashMap<String, ArrayList<Symbol>> unused = new HashMap<String, ArrayList<Symbol>>();
+		for( Symbol s : _table.keySet() ){
+			if( _table.get(s).getUnusedVariables().size() > 0 )
+				unused.put("Warning: Unused variables on "+s.getId() + " class", _table.get(s).getUnusedVariables());
+			if( _table.get(s).getUnusedMethods().size() > 0 )
+				unused.put("Warning: Unused methods on "+s.getId()+" class", _table.get(s).getUnusedMethods());
+			for( Symbol m : _table.get(s).getMethods().keySet() ){
+				if(_table.get(s).getMethods().get(m).getUnusedVariables().size() > 0)
+					unused.put("Warning: Unused variable on method "+m.getId()+" from "+s.getId()+" class", _table.get(s).getMethods().get(m).getUnusedVariables());
+				if(_table.get(s).getMethods().get(m).getUnusedArguments().size() > 0)
+					unused.put("Warning: Unused argument on method "+m.getId()+" from "+s.getId()+" class", _table.get(s).getMethods().get(m).getUnusedArguments());
+			}
+		}
+		for(String r : unused.keySet()){
+			System.out.println(r);
+			for(Symbol s : unused.get(r)){
+				System.out.print("-"+s.getId()+"  ");
+			}
+			System.out.println();
+		}
+		
+	}
+	
+	
 	
 	public void printErrors(){
 		for( E error : _errors){

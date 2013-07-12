@@ -47,29 +47,56 @@ public class Method{
 	
 	public Type searchByName(String name){
 		for(Symbol s : _variables.keySet()){
-			if(s.getId().equals(name))
+			if(s.getId().equals(name)){
+				s.used();
+				_variables.put(s, _variables.get(s));
 				return _variables.get(s);
+			}
 		}
 		for(Symbol s : _arguments.keySet()){
-			if(s.getId().equals(name))
+			if(s.getId().equals(name)){
+				s.used();
+				_arguments.put(s, _arguments.get(s));
 				return _arguments.get(s);
+			}
 		}
 		return null;
 	}
 	
 	public Type getVarType(String name){
 		for(Symbol s : _variables.keySet()){
-			if(s.getId().equals(name))
+			if(s.getId().equals(name)){
+				s.used();
+				_variables.put(s, _variables.get(s));
 				return _variables.get(s);
+			}
 		}
 		return null;
 	}
 	
 	public void setVarType(String name, Type type){
 		for(Symbol s : _variables.keySet()){
-			if(s.getId().equals(name))
+			if(s.getId().equals(name)){
+				s.used();
 				_variables.put(s, type);
+			}
 		}
+	}
+	
+	public ArrayList<Symbol> getUnusedVariables(){
+		ArrayList<Symbol> all = new ArrayList<Symbol>();
+		for(Symbol s : _variables.keySet()){
+			if( !s.isUsed() ) all.add(s);
+		}
+		return all;
+	}
+	
+	public ArrayList<Symbol> getUnusedArguments(){
+		ArrayList<Symbol> all = new ArrayList<Symbol>();
+		for(Symbol s : _arguments.keySet()){
+			if( !s.isUsed() ) all.add(s);
+		}
+		return all;
 	}
 	
 	public Symbol getMethodName() {

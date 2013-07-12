@@ -8,6 +8,7 @@ import AST.Visitor.*;
 import Generation.Generator;
 import java_cup.runtime.Symbol;
 
+import java.awt.print.Printable;
 import java.io.FileReader;
 import java.util.*;
 
@@ -38,7 +39,7 @@ public class TestParser {
                     System.out.println("===============Type Checker==================");
                     errors = tc.getErrors();
                     printErrors(errors);
-                    
+                    sv.getTable().printAllUnused();
                     if ( errors.isEmpty() ){
                     	Generator g = new Generator(sv.getTable(), dir);
                         program.accept(g);

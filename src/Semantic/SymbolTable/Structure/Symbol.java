@@ -5,6 +5,7 @@ import java.util.Set;
 public class Symbol {
 	
 	private String _id;
+	private boolean _used = false;
 	private int _line;
 	private int _hashCode;
 	
@@ -55,5 +56,13 @@ public class Symbol {
 
 	public void setLine(int line) {
 		this._line = line;
+	}
+	
+	public boolean isUsed(){
+		return _used;
+	}
+	
+	public void used(){
+		_used = true;
 	}
 }

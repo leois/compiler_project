@@ -45,8 +45,10 @@ public class Clase{
 	
 	public Type searchVariableByName(String var){
 		for(Symbol s : _variables.keySet()){
-			if(s.getId().equals(var))
+			if(s.getId().equals(var)){
+				s.used();
 				return _variables.get(s);
+			}
 		}
 		return null;
 	}
@@ -54,6 +56,7 @@ public class Clase{
 	public Method searchMethodByName(String met){
 		for(Symbol s : _methods.keySet()){
 			if(s.getId().equals(met))
+				s.used();
 				return _methods.get(s);
 		}
 		return null;
@@ -61,8 +64,10 @@ public class Clase{
 	
 	public void setVarType(String name, Type type){
 		for(Symbol s : _variables.keySet()){
-			if(s.getId().equals(name))
+			if(s.getId().equals(name)){
+				s.used();
 				_variables.put(s, type);
+			}
 		}
 	}
 
@@ -116,6 +121,22 @@ public class Clase{
 
 	public List<E> getErrors() {
 		return _errors;
+	}
+	
+	public ArrayList<Symbol> getUnusedMethods(){
+		ArrayList<Symbol> all = new ArrayList<Symbol>();
+		for(Symbol s : _methods.keySet()){
+			if( !s.isUsed() ) all.add(s);
+		}
+		return all;
+	}
+	
+	public ArrayList<Symbol> getUnusedVariables(){
+		ArrayList<Symbol> all = new ArrayList<Symbol>();
+		for(Symbol s : _variables.keySet()){
+			if( !s.isUsed() ) all.add(s);
+		}
+		return all;
 	}
 
 	public void setErrors(List<E> errors) {
